@@ -1,4 +1,7 @@
 const mongoose  = require("mongoose")
+const dotenv = require("dotenv");
+dotenv.config();
+
 
 
 const dbConnection = async()=>{
@@ -7,8 +10,8 @@ const dbConnection = async()=>{
         if (mongoose.connection.readyState === 1) {
                     return mongoose.connection;
         }
+        await mongoose.connect(process.env.MONGO_URI);
 
-        await mongoose.connect("mongodb://localhost:27017/BookStore");
         console.log("MongoDB Connected Successfully");
 
         return mongoose.connection;

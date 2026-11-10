@@ -10,12 +10,15 @@ const schema = new Schema({
         type:String,
         required:true,
         unique:true,
-        lowercase:true
+        lowercase:true,
+        trim:true
     },
     password:{
         type:String,
-        required:true
-    }
+        required:true,
+        minlength: 6,
+        lowercase:true
+    },
 },{ timestamps: true })
 
 const userSchema = new model("User",schema)

@@ -1,145 +1,445 @@
-# Day 1–2: Requirement Analysis
-## Project: RESTful Blog Application API
+# RESTful Blog Application API
 
-**Project ID:** SCR845NGFF  
-**Technology Stack:** Node.js, Express.js, MongoDB, Mongoose, JWT
+```{=html}
+<p align="center">
+```
+`<strong>`{=html}Project ID: SCR845NGFF`</strong>`{=html}`<br>`{=html}
+Backend REST API · 25-Day Development Plan
+```{=html}
+</p>
+```
+```{=html}
+<p align="center">
+```
+`<img alt="Node.js" src="https://img.shields.io/badge/Node.js-Runtime-339933?logo=nodedotjs&logoColor=white">`{=html}
+`<img alt="Express" src="https://img.shields.io/badge/Express.js-API%20Framework-000000?logo=express">`{=html}
+`<img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white">`{=html}
+`<img alt="Mongoose" src="https://img.shields.io/badge/Mongoose-ODM-880000">`{=html}
+`<img alt="JWT" src="https://img.shields.io/badge/JWT-Authentication-000000?logo=jsonwebtokens">`{=html}
+`<img alt="Postman" src="https://img.shields.io/badge/Postman-API%20Testing-FF6C37?logo=postman&logoColor=white">`{=html}
+```{=html}
+</p>
+```
+A **backend-only blogging API** that lets users register, authenticate,
+publish posts, and manage comments. The API exchanges JSON over HTTP and
+uses JWT authentication to protect write operations.
 
-## 1. Introduction
+> **Scope:** This project is an API, not a website. Postman is used to
+> send requests and verify responses; no frontend is required.
 
-The RESTful Blog Application API is a backend application designed to manage blog posts and comments. It allows users to register, authenticate, create blog posts, view posts, update their own posts, and delete them.
+------------------------------------------------------------------------
 
-The application also provides comment management functionality, allowing authenticated users to add, view, update, and delete comments.
+## 1. What the API does
 
-The API follows REST architectural principles and uses JSON (JavaScript Object Notation) as the data exchange format between the client and server.
+  Area             Main capability
+  ---------------- --------------------------------------------------
+  Users            Register and log in
+  Authentication   Issue and verify JWT access tokens
+  Posts            Create, list, view, update and delete posts
+  Comments         Add, list, view, update and delete comments
+  Authorization    Restrict post/comment changes to their owners
+  Reliability      Validate input and return meaningful HTTP errors
 
-## 2. Objectives
+### Core rules
 
-The main objectives of this project are:
+-   Anyone can read public posts and comments.
+-   A valid JWT is required to create posts or comments.
+-   A user can update or delete only content they own.
+-   The server determines the author from the verified token; never
+    trust an `author_id` sent by the caller.
 
-1. Develop a RESTful API using Node.js and Express.js.
-2. Create user registration and login functionality.
-3. Store user information, blog posts, and comments in MongoDB.
-4. Implement CRUD (Create, Read, Update, Delete) operations.
-5. Implement JWT-based authentication.
-6. Provide authorization to prevent unauthorized modifications.
-7. Validate user input and handle errors properly.
-8. Test API endpoints using Postman.
+------------------------------------------------------------------------
 
-## 3. Functional Requirements
+## 2. Technology and responsibilities
 
-Functional requirements describe the operations and features that the application must provide.
+  -----------------------------------------------------------------------
+  Technology                          Why it is used
+  ----------------------------------- -----------------------------------
+  Node.js                             Runs JavaScript on the server
 
-### A. User Management
+  Express.js                          Defines API routes and handles HTTP
+                                      requests
 
-- Users should be able to register using their username, email, and password.
-- Users should be able to log in using their credentials.
-- Passwords must be securely hashed using bcrypt.
-- The server should generate a JWT after successful authentication.
+  MongoDB                             Stores users, posts and comments as
+                                      documents
 
-### B. Blog Post Management
+  Mongoose                            Defines schemas, references and
+                                      database operations
 
-- Users should be able to create blog posts.
-- Users should be able to retrieve all blog posts.
-- Users should be able to retrieve a specific post using its ID.
-- Users should be able to update their own posts.
-- Users should be able to delete their own posts.
+  bcrypt                              Hashes passwords before storage and
+                                      verifies login passwords
 
-### C. Comment Management
+  JWT                                 Carries a signed user identity for
+                                      protected requests
 
-- Users should be able to add comments to blog posts.
-- Users should be able to retrieve comments associated with a particular post.
-- Users should be able to retrieve a specific comment.
-- Users should be able to update their own comments.
-- Users should be able to delete their own comments.
+  Postman                             Tests endpoints, request bodies,
+                                      headers and responses
+  -----------------------------------------------------------------------
 
-### D. Authentication and Authorization
+------------------------------------------------------------------------
 
-- JWT should be used to authenticate users.
-- Protected routes should require a valid access token.
-- Only authenticated users should be allowed to create posts and comments.
-- Users should not be allowed to modify or delete another user's posts or comments.
+## 3. How a request moves through the API
 
-## 4. Non-Functional Requirements
+``` text
+Postman / API Client
+        |
+        v
+   Express Route
+        |
+        v
+ Authentication Middleware  (protected routes)
+        |
+        v
+     Controller
+        |
+        v
+   Mongoose Model
+        |
+        v
+     MongoDB
+        |
+        v
+   JSON Response
+```
 
-1. **Security:** Passwords must be hashed and protected routes must use JWT authentication.
-2. **Performance:** Database queries should be optimized for efficient data retrieval.
-3. **Scalability:** The application should support additional features in the future.
-4. **Maintainability:** The project should follow a modular folder structure.
-5. **Reliability:** The API should handle invalid requests and unexpected errors.
-6. **Usability:** API responses should be understandable and consistently formatted.
+**Concepts**
 
-## 5. Identification of API Endpoints
+-   **Route:** Connects an HTTP method and URL to an action.
+-   **Middleware:** Runs before the controller; verifies the JWT when
+    required.
+-   **Controller:** Reads request data, applies the operation and sends
+    a response.
+-   **Schema/Model:** Defines document fields and database behaviour.
+-   **MongoDB:** Persists the application data.
 
-An API endpoint is a specific URL through which a client communicates with the server to perform an operation.
+------------------------------------------------------------------------
 
-### A. Authentication Endpoints
+## 4. Database design
 
-| HTTP Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/auth/register | Register a new user |
-| POST | /api/auth/login | Authenticate an existing user |
+The assignment uses three main collections.
 
-### B. Blog Post Endpoints
+### `users`
 
-| HTTP Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/posts | Create a new blog post |
-| GET | /api/posts | Retrieve all blog posts |
-| GET | /api/posts/:id | Retrieve a specific blog post |
-| PUT | /api/posts/:id | Update a blog post |
-| DELETE | /api/posts/:id | Delete a blog post |
+  Field                      Meaning
+  -------------------------- ----------------------------------------
+  `_id`                      Unique user ID generated by MongoDB
+  `username`                 User's display name
+  `email`                    Unique account email
+  `password`                 bcrypt password hash, never plain text
+  `createdAt`, `updatedAt`   Timestamps
 
-### C. Comment Endpoints
+### `posts`
 
-| HTTP Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/comments | Create a new comment |
-| GET | /api/comments?postId=:postId | Retrieve comments of a post |
-| GET | /api/comments/:id | Retrieve a specific comment |
-| PUT | /api/comments/:id | Update a comment |
-| DELETE | /api/comments/:id | Delete a comment |
+  Field                      Meaning
+  -------------------------- -----------------------------------------------
+  `_id`                      Unique post ID
+  `title`                    Post title
+  `content`                  Main post content
+  `author`                   ObjectId reference to the user who created it
+  `createdAt`, `updatedAt`   Timestamps
 
-## 6. User Roles and Permissions
+### `comments`
 
-The application initially supports two access states:
+  Field                      Meaning
+  -------------------------- ---------------------------------------------
+  `_id`                      Unique comment ID
+  `post`                     ObjectId reference to the related post
+  `content`                  Comment text
+  `author`                   ObjectId reference to the user who wrote it
+  `createdAt`, `updatedAt`   Timestamps
 
-**1. Guest User**
-- Can view blog posts.
-- Can view comments.
-- Cannot create, update, or delete content.
+### Relationships
 
-**2. Authenticated User**
-- Can create blog posts.
-- Can create comments.
-- Can update their own posts and comments.
-- Can delete their own posts and comments.
+``` text
+USER  1 -------- many  POSTS
+USER  1 -------- many  COMMENTS
+POST  1 -------- many  COMMENTS
+```
 
-## 7. Basic Application Workflow
+A comment does not need to be embedded in the post document. Its `post`
+field stores the post's ObjectId. To get comments for one post, query
+the comments collection by that ID.
 
-1. A user registers an account.
-2. The server validates the registration details.
-3. The password is hashed and stored in MongoDB.
-4. The user logs in with registered credentials.
-5. The server verifies the credentials and generates a JWT.
-6. The user sends the JWT with protected API requests.
-7. The server verifies the token.
-8. The user performs authorized blog post and comment operations.
-9. The server communicates with MongoDB and returns the appropriate JSON response.
+**Example relationship**
 
-## 8. Expected Project Outcome
+``` json
+// Post
+{
+  "_id": "POST_ID",
+  "title": "Learning Node.js"
+}
 
-After completing the project, the application should provide a fully functional RESTful API supporting:
+// Comment
+{
+  "_id": "COMMENT_ID",
+  "content": "Helpful article!",
+  "post": "POST_ID",
+  "author": "USER_ID"
+}
+```
 
-- User registration and authentication.
-- Secure JWT-based access control.
-- Complete CRUD operations for blog posts.
-- Complete CRUD operations for comments.
-- MongoDB database integration.
-- Input validation and error handling.
-- API testing and documentation.
+`POST_ID` in the comment links it to the matching post.
 
-## 9. Conclusion
+------------------------------------------------------------------------
 
-Requirement analysis establishes the foundation of the RESTful Blog Application API. It identifies the application's functional and non-functional requirements, user permissions, and API endpoints.
+## 5. API endpoints
 
-This analysis provides a clear development roadmap and helps ensure that the application is structured, secure, and maintainable before proceeding to database design and implementation.
+Local base URL used in examples:
+
+``` text
+http://localhost:5000/api
+```
+
+### Authentication
+
+  ------------------------------------------------------------------------
+  Method            Endpoint           Access            Purpose
+  ----------------- ------------------ ----------------- -----------------
+  `POST`            `/auth/register`   Public            Create an account
+
+  `POST`            `/auth/login`      Public            Verify
+                                                         credentials and
+                                                         receive a JWT
+  ------------------------------------------------------------------------
+
+### Posts
+
+  Method     Endpoint       Access          Purpose
+  ---------- -------------- --------------- ---------------
+  `POST`     `/posts`       Authenticated   Create a post
+  `GET`      `/posts`       Public          List posts
+  `GET`      `/posts/:id`   Public          Get one post
+  `PUT`      `/posts/:id`   Owner only      Update a post
+  `DELETE`   `/posts/:id`   Owner only      Delete a post
+
+### Comments
+
+  ------------------------------------------------------------------------------------
+  Method            Endpoint                       Access            Purpose
+  ----------------- ------------------------------ ----------------- -----------------
+  `POST`            `/comments`                    Authenticated     Create a comment
+
+  `GET`             `/comments?post_id=:post_id`   Public            List comments for
+                                                                     a post
+
+  `GET`             `/comments/:id`                Public            Get one comment
+
+  `PUT`             `/comments/:id`                Owner only        Update a comment
+
+  `DELETE`          `/comments/:id`                Owner only        Delete a comment
+  ------------------------------------------------------------------------------------
+
+> Keep endpoint names and query parameter spelling consistent between
+> the implementation, Postman collection and this guide.
+
+### Example request bodies
+
+**Register**
+
+``` json
+{
+  "username": "naseem",
+  "email": "naseem@example.com",
+  "password": "Use-A-Strong-Password"
+}
+```
+
+**Login**
+
+``` json
+{
+  "email": "naseem@example.com",
+  "password": "Use-A-Strong-Password"
+}
+```
+
+**Create post**
+
+``` json
+{
+  "title": "Learning REST APIs",
+  "content": "A REST API exposes resources through HTTP endpoints."
+}
+```
+
+**Create comment**
+
+``` json
+{
+  "post_id": "REPLACE_WITH_POST_OBJECT_ID",
+  "content": "This explanation was helpful."
+}
+```
+
+The author ID is not supplied in post/comment bodies. It comes from the
+authenticated user.
+
+------------------------------------------------------------------------
+
+## 6. Authentication: how the API identifies a user
+
+``` text
+Register
+   |
+   v
+Hash password with bcrypt
+   |
+   v
+Save user in MongoDB
+   |
+   v
+Login: find user + compare password
+   |
+   v
+Sign JWT containing user ID
+   |
+   v
+Caller sends Authorization: Bearer <token>
+   |
+   v
+JWT middleware verifies token
+   |
+   v
+Attach verified identity to request (req.user)
+   |
+   v
+Controller performs the requested action
+```
+
+**Key distinction**
+
+-   **Authentication:** Is the request associated with a valid user
+    identity?
+-   **Authorization:** Is that user allowed to change this particular
+    post or comment?
+
+For ownership checks, compare the resource's stored `author` ID with the
+verified `req.user` ID. A valid token alone does not grant permission to
+edit every resource.
+
+**Logout note:** With basic stateless JWT authentication, removing the
+token from the API client's saved authorization settings stops that
+client from sending it. The token remains valid until expiry unless
+server-side revocation/blacklisting is implemented.
+
+------------------------------------------------------------------------
+
+## 7. Validation and HTTP responses
+
+Validate required fields, email format, duplicate accounts, password
+requirements, non-empty post/comment content, valid MongoDB ObjectIds
+and the existence of referenced posts.
+
+  Status   Meaning                 Example
+  -------- ----------------------- -------------------------------------------
+  `200`    OK                      Read or update succeeded
+  `201`    Created                 Post or comment created
+  `204`    No Content              Resource deleted
+  `400`    Bad Request             Missing field or invalid ID
+  `401`    Unauthorized            Missing, invalid or expired JWT
+  `403`    Forbidden               User tries to edit another user's content
+  `404`    Not Found               Post, comment or user does not exist
+  `409`    Conflict                Duplicate email
+  `500`    Internal Server Error   Unexpected server failure
+
+Never return passwords, password hashes, JWT secrets, database
+credentials or production stack traces.
+
+------------------------------------------------------------------------
+
+## 8. 25-day development roadmap
+
+  -----------------------------------------------------------------------
+  Days                    Phase                   Expected outcome
+  ----------------------- ----------------------- -----------------------
+  1--2                    Requirement analysis    Features and endpoint
+                                                  plan
+
+  3--5                    Database design and     Collections, schemas
+                          setup                   and relationships
+
+  6--10                   API development         Post and comment CRUD +
+                                                  validation
+
+  11--13                  Authentication and      Registration, login,
+                          authorization           JWT and ownership
+                                                  checks
+
+  14--16                  Testing                 Unit and integration
+                                                  tests
+
+  17--18                  Documentation (optional API reference and short
+                          in brief)               user guide
+
+  19--21                  Review and refactoring  Cleaner, maintainable
+                                                  code
+
+  22--25                  Submission              Final tested code
+                                                  pushed to GitHub
+  -----------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## 9. Testing checklist (Postman)
+
+-   [ ] Register with valid details.
+-   [ ] Reject missing fields and duplicate email.
+-   [ ] Log in with correct credentials.
+-   [ ] Reject incorrect credentials.
+-   [ ] Access a protected endpoint with a valid token.
+-   [ ] Reject missing, invalid and expired tokens.
+-   [ ] Create, list, retrieve, update and delete posts.
+-   [ ] Prevent a user from editing or deleting another user's post.
+-   [ ] Add comments and retrieve comments for the correct post.
+-   [ ] Update and delete comments.
+-   [ ] Prevent a user from editing or deleting another user's comment.
+-   [ ] Handle invalid IDs and references to missing posts.
+-   [ ] Check response status codes and JSON response bodies.
+
+------------------------------------------------------------------------
+
+## 10. Repository and delivery checklist
+
+The repository currently exposes top-level folders such as `config/`,
+`controllers/`, `middleware/`, `routes/` and `schema/`. Keep
+responsibilities separated and make the README match the actual
+filenames and implementation.
+
+-   [ ] Database connection works.
+-   [ ] User, post and comment schemas are correct.
+-   [ ] All required endpoints work.
+-   [ ] Authentication and ownership checks work.
+-   [ ] Validation and error handling are consistent.
+-   [ ] Unit and integration tests pass.
+-   [ ] Postman collection or Swagger/OpenAPI documentation is included.
+-   [ ] Setup instructions match the actual project.
+-   [ ] `.gitignore` excludes `node_modules/`, `.env` and local files.
+-   [ ] No real credentials or secrets are committed to GitHub.
+
+**Security check:** If a real `.env` file or secret has already been
+pushed, adding it to `.gitignore` is not enough. Remove it from tracking
+and rotate any exposed credentials.
+
+------------------------------------------------------------------------
+
+## 11. Final deliverables
+
+1.  Working REST API for users, posts and comments.
+2.  MongoDB schemas and database setup.
+3.  JWT authentication and ownership-based authorization.
+4.  Input validation and error handling.
+5.  Unit and integration test cases.
+6.  API documentation and example requests.
+7.  Final source code in the GitHub repository.
+
+------------------------------------------------------------------------
+
+## Project links
+
+-   **GitHub repository:**
+    https://github.com/Naseem-ux/Blog-Application-API
+-   **Project ID:** `SCR845NGFF`
+
+> **Implementation status:** This guide describes the assignment
+> requirements and intended behaviour. Mark a feature complete only
+> after it is implemented and tested in the repository.

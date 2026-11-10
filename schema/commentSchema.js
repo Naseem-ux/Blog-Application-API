@@ -20,4 +20,5 @@ const schema = new Schema({
 
 const commentSchema = new model("Comment", schema)
 
+
 module.exports = { commentSchema }

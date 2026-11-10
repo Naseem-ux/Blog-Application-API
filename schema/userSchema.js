@@ -16,8 +16,9 @@ const schema = new Schema({
     password:{
         type:String,
         required:true,
-        minlength: 6
-    }
+        minlength: 6,
+        lowercase:true
+    },
 },{ timestamps: true })
 
 const userSchema = new model("User",schema)

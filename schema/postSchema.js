@@ -10,6 +10,7 @@ const schema = new Schema({
         type:String,
         required:true,
         trim: true
+
     },
     author:{
         type:Schema.Types.ObjectId,
